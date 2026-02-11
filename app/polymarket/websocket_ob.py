@@ -9,13 +9,14 @@ from polymarket.tools import get_ids, seconds_until_reconnect
 
 
 class WebSocketOrderBook:
-    def __init__(self, channel_type, url, asset_id_maps, writer, loop, data_manager):
+    def __init__(self, channel_type, url, asset_id_maps, writer, loop, data_manager, logger):
         self.channel_type = channel_type
         self.url = url
         self.asset_id_maps = asset_id_maps
         self.writer = writer
         self.loop = loop
         self.data_manager = data_manager
+        self.logger = logger
 
         furl = url + "/ws/" + channel_type
         self.ws = WebSocketApp(
@@ -29,6 +30,8 @@ class WebSocketOrderBook:
 
     def on_message(self, ws, message):
         try:
+            if message == "PONG":
+                return
             msg = json.loads(message)
             if isinstance(msg, dict) and "event_type" in msg:
                 if msg.get("event_type") == "best_bid_ask":
@@ -47,14 +50,14 @@ class WebSocketOrderBook:
                     )
 
         except Exception as e:
-            print(f"Polymarket error: {e} on message {message}")
+            self.logger.error(f"Polymarket error: {e} on message {message}")
 
 
     def on_error(self, ws, error):
-        print("Error: ", error)
+        self.logger.error(f"Error: {error}")
 
     def on_close(self, ws, close_status_code, close_msg):
-        print("closing")
+        self.logger.info(f"Polymarket closing: {close_status_code}, {close_msg}")
 
     def on_open(self, ws):
         ws.send(json.dumps({
@@ -88,16 +91,16 @@ class WebSocketOrderBook:
             pass
 
 
-def polymarket_runner(writer, loop, data_manager):
+def polymarket_runner(writer, loop, data_manager, logger):
     url = "wss://ws-subscriptions-clob.polymarket.com"
 
     while True:
         try:
             asset_id_maps = get_ids()
-            print("Polymarket IDs:", asset_id_maps)
+            logger.info(f"Polymarket IDs: {asset_id_maps}")
 
             market_connection = WebSocketOrderBook(
-                "market", url, asset_id_maps, writer, loop, data_manager
+                "market", url, asset_id_maps, writer, loop, data_manager, logger
             )
 
             t = threading.Thread(
@@ -107,13 +110,13 @@ def polymarket_runner(writer, loop, data_manager):
             t.start()
 
             sleep_s = seconds_until_reconnect()
-            print(f"[Polymarket] sleeping {sleep_s}s")
+            logger.info(f"[Polymarket] sleeping {sleep_s}s")
             time.sleep(sleep_s)
 
-            print("[Polymarket] reconnecting")
+            logger.info("[Polymarket] reconnecting")
             market_connection.disconnect()
             time.sleep(1)
 
         except Exception as e:
-            print("[Polymarket] error:", e)
+            logger.error(f"[Polymarket] error: {e}")
             time.sleep(5)

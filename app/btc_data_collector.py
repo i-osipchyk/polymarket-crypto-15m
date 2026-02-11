@@ -10,6 +10,7 @@ from collections import defaultdict
 from polymarket.websocket_ob import polymarket_runner
 
 from tools.writer import JSONLWriter
+from tools.logger import setup_logger
 from tools.data_manager import DataManager
 from binance.listeners.l2_listener import L2Listener
 from binance.listeners.tape_listener import TapeListener
@@ -22,16 +23,20 @@ TAPE_WS = f"wss://stream.binance.com:9443/ws/{SYMBOL}@trade"
 
 LEVELS_USED = 10
 DATA_FOLDER = "data"
+LOGGING_FOLDER = "logs"
 
 async def main():
+    logger = setup_logger(LOGGING_FOLDER)
+    logger.info("Starting trading session...")
+
     # event loop
     loop = asyncio.get_running_loop()
 
     # writers
-    l2_writer = JSONLWriter(DATA_FOLDER, "l2.jsonl")
-    tape_writer = JSONLWriter(DATA_FOLDER, "tape.jsonl")
-    polymarket_writer = JSONLWriter(DATA_FOLDER, "polymarket.jsonl")
-    data_manager_writer = JSONLWriter(DATA_FOLDER, "combined_data.jsonl")
+    l2_writer = JSONLWriter(DATA_FOLDER, "l2.jsonl", logger=logger)
+    tape_writer = JSONLWriter(DATA_FOLDER, "tape.jsonl", logger=logger)
+    polymarket_writer = JSONLWriter(DATA_FOLDER, "polymarket.jsonl", logger=logger)
+    data_manager_writer = JSONLWriter(DATA_FOLDER, "combined_data.jsonl", logger=logger)
 
     await asyncio.gather(
         # l2_writer.start(),
@@ -61,7 +66,7 @@ async def main():
     # polymarket runs in its own thread
     threading.Thread(
         target=polymarket_runner,
-        args=(polymarket_writer, loop, data_manager),
+        args=(polymarket_writer, loop, data_manager, logger),
         daemon=True
     ).start()
 

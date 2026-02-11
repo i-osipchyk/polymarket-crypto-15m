@@ -1,13 +1,14 @@
-import json
-import asyncio
 import os
+import json
+import logging
+import asyncio
 import traceback
 from datetime import datetime
 from tools.tools import curr_timestamp_15min
 
 
 class JSONLWriter:
-    def __init__(self, base_dir: str, name: str, file_rotation: bool = True):
+    def __init__(self, base_dir: str, name: str, file_rotation: bool = True, logger: logging.Logger = None):
         """
         base_dir: e.g. 'data'
         name: e.g. 'polymarket.json' (will be formatted as MM_polymarket.jsonl)
@@ -22,6 +23,8 @@ class JSONLWriter:
         self._file = None
 
         self.file_rotation = file_rotation
+
+        self.logger = logger
 
     async def start(self):
         if self._task is None:
@@ -66,7 +69,7 @@ class JSONLWriter:
         self._file = open(file_path, "a", encoding="utf-8", buffering=1)
 
         self._current_ts = candle_ts
-        print(f"[JSONLWriter] Switched to {file_path}")
+        self.logger.info(f"[JSONLWriter] Switched to {file_path}")
 
     async def _writer(self):
         try:
@@ -83,6 +86,6 @@ class JSONLWriter:
                 self.queue.task_done()
 
         except Exception:
-            traceback.print_exc()
+            self.logger.error(traceback.format_exc())
             raise
         

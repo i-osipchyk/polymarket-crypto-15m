@@ -20,8 +20,6 @@ class DataManager:
             
             # Send to the async writer queue
             await self.writer.write(completed_record)
-
-            print(f"Flushed data for timestamp {self.last_ts}: {completed_record}")
         
         self.last_ts = current_ts
 
@@ -57,19 +55,4 @@ class DataManager:
         if ts not in self.data:
             self.data[ts] = {}
         self.data[ts].update(metrics)
-
-
-{
-    "ts": 1769683559,
-    "source": "polymarket", 
-    "data": {
-        "market": "0xb8e148384d3c87e0b6e2546c5e6f9ec04c43262a2f27e21f0296046d8d99f707", 
-        "asset_id": "100100239228023778875566885637091998604702171012108324589519007208837723375850", 
-        "best_bid": "0.53", 
-        "best_ask": "0.54", 
-        "spread": "0.01", 
-        "timestamp": "1769683559574", 
-        "event_type": "best_bid_ask", 
-        "outcome": "up"
-    }
-}
+        
