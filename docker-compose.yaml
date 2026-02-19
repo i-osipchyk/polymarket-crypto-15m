@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  btc-collector:
+    build: .
+    container_name: btc_data_app
+    volumes:
+      # Maps local folders to the container's working directory
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app/app
+    restart: unless-stopped
