@@ -77,11 +77,21 @@ class WebSocketOrderBook:
                 break
 
     def run(self):
-        self.ws.run_forever()
+        while not self._stop_event.is_set():
+            self.logger.info("Starting WebSocket connection...")
+            self.ws.run_forever(ping_interval=30, ping_timeout=10)
+            
+            if not self._stop_event.is_set():
+                self.logger.warning("WebSocket disconnected unexpectedly. Retrying in 5s...")
+                time.sleep(5)
 
     def connect(self):
         self._stop_event.clear()
-        self.ws.run_forever()
+        self.ws.run_forever(
+            ping_interval=30, 
+            ping_timeout=10, 
+            reconnect=5
+        )
 
     def disconnect(self):
         self._stop_event.set()
