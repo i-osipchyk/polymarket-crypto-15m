@@ -9,9 +9,9 @@ from collections import defaultdict
 
 from polymarket.websocket_ob import polymarket_runner
 
-from tools.writer import JSONLWriter
-from tools.logger import setup_logger
-from tools.data_manager import DataManager
+from core.writer import JSONLWriter
+from core.logger import setup_logger
+from core.data_manager import DataManager
 from binance.listeners.l2_listener import L2Listener
 from binance.listeners.tape_listener import TapeListener
 from binance.aggregators.l2_aggregator import L2Aggregator
@@ -79,4 +79,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-    

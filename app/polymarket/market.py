@@ -2,7 +2,7 @@ import time
 import json
 import requests
 
-from tools.tools import curr_timestamp_15min
+from core.time_utils import curr_timestamp_15min
 
 def extract_asset_map(market_json):
     outcomes = json.loads(market_json["outcomes"])

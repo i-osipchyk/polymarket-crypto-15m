@@ -4,7 +4,7 @@ import logging
 import asyncio
 import traceback
 from datetime import datetime
-from tools.tools import curr_timestamp_15min
+from core.time_utils import curr_timestamp_15min
 
 
 class JSONLWriter:
@@ -45,8 +45,6 @@ class JSONLWriter:
             self._file.close()
 
         # Convert timestamp to a datetime object
-        # Note: Assuming curr_timestamp_15min() returns seconds. 
-        # If it returns milliseconds, use candle_ts / 1000
         dt = datetime.fromtimestamp(candle_ts)
 
         # Create folder structure: base_dir/yyyy/mm/dd/hh
@@ -62,9 +60,9 @@ class JSONLWriter:
         # Create filename: MM_filename.jsonl (e.g., 15_polymarket.jsonl)
         minute_prefix = dt.strftime('%M')
         file_name = f"{minute_prefix}_{self.name}"
-        
+
         file_path = os.path.join(dir_path, file_name)
-        
+
         # Open with line buffering (buffering=1) for real-time safety
         self._file = open(file_path, "a", encoding="utf-8", buffering=1)
 
@@ -78,7 +76,7 @@ class JSONLWriter:
 
                 if self.file_rotation:
                     self._open_new_file()
-                
+
                 # Ensure we have an open file before writing
                 if self._file:
                     self._file.write(json.dumps(obj) + "\n")
@@ -88,4 +86,3 @@ class JSONLWriter:
         except Exception:
             self.logger.error(traceback.format_exc())
             raise
-        

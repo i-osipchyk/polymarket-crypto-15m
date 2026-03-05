@@ -12,5 +12,4 @@ COPY . .
 # Ensure Python looks inside the /app/app folder for modules
 ENV PYTHONPATH=/app/app
 
-# Run the script located inside the app folder
-CMD ["python", "app/btc_data_collector.py"]
+CMD ["python", "collector.py"]

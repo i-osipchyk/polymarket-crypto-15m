@@ -6,3 +6,5 @@ pandas
 matplotlib
 web3
 scikit-learn
+xgboost
+seaborn

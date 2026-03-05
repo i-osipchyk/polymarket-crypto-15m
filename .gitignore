@@ -209,3 +209,9 @@ __marimo__/
 
 # Mac Files
 .DS_Store
+
+data/*
+!data/.gitkeep
+logs/*
+!logs/.gitkeep
+*.pem

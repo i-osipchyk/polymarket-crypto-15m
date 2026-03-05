@@ -8,6 +8,8 @@ services:
       # Maps local folders to the container's working directory
       - ./data:/app/data
       - ./logs:/app/logs
+    env_file:
+      - .env
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app/app

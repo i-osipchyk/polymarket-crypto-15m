@@ -5,7 +5,7 @@ import requests
 import threading
 from websocket import WebSocketApp
 
-from polymarket.tools import get_ids, seconds_until_reconnect
+from polymarket.market import get_ids, seconds_until_reconnect
 
 
 class WebSocketOrderBook:
