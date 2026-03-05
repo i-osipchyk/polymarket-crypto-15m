@@ -9,7 +9,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy everything into the container
 COPY . .
 
-# Ensure Python looks inside the /app/app folder for modules
-ENV PYTHONPATH=/app/app
+ENV PYTHONPATH=/app
 
 CMD ["python", "collector.py"]

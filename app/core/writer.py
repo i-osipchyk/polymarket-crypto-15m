@@ -4,7 +4,7 @@ import logging
 import asyncio
 import traceback
 from datetime import datetime
-from core.time_utils import curr_timestamp_15min
+from app.core.time_utils import curr_timestamp_15min
 
 
 class JSONLWriter:

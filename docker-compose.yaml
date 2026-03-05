@@ -12,5 +12,5 @@ services:
       - .env
     environment:
       - PYTHONUNBUFFERED=1
-      - PYTHONPATH=/app/app
+      - PYTHONPATH=/app
     restart: unless-stopped

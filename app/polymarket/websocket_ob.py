@@ -5,7 +5,9 @@ import requests
 import threading
 from websocket import WebSocketApp
 
-from polymarket.market import get_ids, seconds_until_reconnect
+from app.polymarket.market import get_ids, seconds_until_reconnect
+
+MAX_MESSAGE_SIZE = 2 * 1024 * 1024  # 2 MB
 
 
 class WebSocketOrderBook:
@@ -30,20 +32,27 @@ class WebSocketOrderBook:
 
     def on_message(self, ws, message):
         try:
+            if len(message) > MAX_MESSAGE_SIZE:
+                self.logger.warning(f"Polymarket message too large ({len(message)} bytes), skipping")
+                return
             if message == "PONG":
                 return
             msg = json.loads(message)
             if isinstance(msg, dict) and "event_type" in msg:
                 if msg.get("event_type") == "best_bid_ask":
-                    msg["outcome"] = self.asset_id_maps.get(msg["asset_id"], "unknown")
+                    outcome = self.asset_id_maps.get(msg.get("asset_id"), "unknown")
                     metrics = {
                         "ts": int(time.time()),
                         "source": "polymarket",
-                        "data": msg
+                        "data": {
+                            "outcome": outcome,
+                            "best_bid": msg.get("best_bid"),
+                            "best_ask": msg.get("best_ask"),
+                        }
                     }
 
                     self.data_manager.get_pm_data(metrics)
-                        
+
                     asyncio.run_coroutine_threadsafe(
                         self.writer.write(metrics),
                         self.loop
@@ -51,7 +60,6 @@ class WebSocketOrderBook:
 
         except Exception as e:
             self.logger.error(f"Polymarket error: {e} on message {message}")
-
 
     def on_error(self, ws, error):
         self.logger.error(f"Error: {error}")
@@ -65,16 +73,6 @@ class WebSocketOrderBook:
             "assets_ids": list(self.asset_id_maps.keys()),
             "custom_feature_enabled": True
         }))
-
-        threading.Thread(target=self.ping, args=(ws,), daemon=True).start()
-
-    def ping(self, ws):
-        while not self._stop_event.is_set():
-            try:
-                ws.send("PING")
-                time.sleep(10)
-            except Exception:
-                break
 
     def run(self):
         while not self._stop_event.is_set():

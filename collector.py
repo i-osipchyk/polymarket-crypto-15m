@@ -1,21 +1,15 @@
-import time
-import json
 import asyncio
-import requests
 import threading
-import websockets
-from websocket import WebSocketApp
-from collections import defaultdict
 
-from polymarket.websocket_ob import polymarket_runner
+from app.polymarket.websocket_ob import polymarket_runner
 
-from core.writer import JSONLWriter
-from core.logger import setup_logger
-from core.data_manager import DataManager
-from binance.listeners.l2_listener import L2Listener
-from binance.listeners.tape_listener import TapeListener
-from binance.aggregators.l2_aggregator import L2Aggregator
-from binance.aggregators.tape_aggregator import TapeAggregator
+from app.core.writer import JSONLWriter
+from app.core.logger import setup_logger
+from app.core.data_manager import DataManager
+from app.binance.listeners.l2_listener import L2Listener
+from app.binance.listeners.tape_listener import TapeListener
+from app.binance.aggregators.l2_aggregator import L2Aggregator
+from app.binance.aggregators.tape_aggregator import TapeAggregator
 
 SYMBOL = "btcusdt"
 DEPTH_WS = f"wss://stream.binance.com:9443/ws/{SYMBOL}@depth@100ms"
@@ -53,14 +47,16 @@ async def main():
         LEVELS_USED,
         l2_writer,
         L2Aggregator(),
-        data_manager
+        data_manager,
+        logger
     )
 
     trade_listener = TapeListener(
         TAPE_WS,
         tape_writer,
         TapeAggregator(),
-        data_manager
+        data_manager,
+        logger
     )
 
     # polymarket runs in its own thread

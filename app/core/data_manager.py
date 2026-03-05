@@ -1,4 +1,6 @@
-from core.writer import JSONLWriter
+from app.core.writer import JSONLWriter
+
+VALID_OUTCOMES = {"up", "down"}
 
 
 class DataManager:
@@ -34,7 +36,7 @@ class DataManager:
         best_bid = data.get("best_bid")
         best_ask = data.get("best_ask")
 
-        if outcome and best_bid and best_ask:
+        if outcome in VALID_OUTCOMES and best_bid and best_ask:
             self.data[ts].update({
                 f"{outcome}_best_bid": best_bid,
                 f"{outcome}_best_ask": best_ask
